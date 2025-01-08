@@ -694,6 +694,48 @@
         // Initialize
         updateDashboard();
         setInterval(updateDashboard, 30000);
+// Add this to your management dashboard's script section
+let ws;
+const SERVER_URL = 'ws://localhost:8080'; // Change to your server URL when deployed
+
+function connectDashboardWebSocket() {
+    ws = new WebSocket(SERVER_URL);
+    
+    ws.onopen = () => {
+        updateConnectionStatus('Connected');
+    };
+
+    ws.onmessage = (event) => {
+        try {
+            const data = JSON.parse(event.data);
+            if (data.type === 'kiosk_request') {
+                // Update inventory
+                handleKioskData(data);
+            }
+        } catch (error) {
+            console.error('Error processing message:', error);
+        }
+    };
+
+    ws.onclose = () => {
+        updateConnectionStatus('Disconnected');
+        // Try to reconnect after 5 seconds
+        setTimeout(connectDashboardWebSocket, 5000);
+    };
+}
+
+function updateConnectionStatus(status) {
+    const statusElement = document.querySelector('.last-sync');
+    if (statusElement) {
+        statusElement.innerHTML = `
+            <i class="fas fa-${status === 'Connected' ? 'check-circle' : 'exclamation-circle'}"></i>
+            Status: ${status} (${new Date().toLocaleTimeString()})
+        `;
+    }
+}
+
+// Initialize connection
+document.addEventListener('DOMContentLoaded', connectDashboardWebSocket);    
     </script>
 </body>
 </html>

@@ -120,17 +120,24 @@
         }
 
         .inventory-table th,
-        .inventory-table td {
-            padding: 1rem;
-            text-align: left;
-            border-bottom: 1px solid #e2e8f0;
-        }
+.inventory-table td {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+}
 
-        .inventory-table th {
-            background: #f8fafc;
-            font-weight: 600;
-        }
+.inventory-table th {
+    background: #f8fafc;
+    font-weight: 600;
+}
 
+.inventory-table th:first-child {
+    text-align: left;
+}
+
+.inventory-table td:first-child {
+    text-align: left;
+}
         .status {
             padding: 0.25rem 0.75rem;
             border-radius: 1rem;
@@ -302,6 +309,85 @@
                 flex-direction: column;
             }
         }
+        .connection-status {
+    padding: 0.5rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.connection-status i {
+    font-size: 0.6rem;
+}
+
+.connection-status.connected i {
+    color: var(--success);
+}
+
+.connection-status.disconnected i {
+    color: var(--danger);
+}
+
+.empty-message {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 2rem;
+    color: #6b7280;
+    height: 100%;
+}
+
+.wave-container {
+    width: 100px;
+    height: 100px;
+    margin: 1rem;
+    position: relative;
+}
+
+.wave {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    background: rgba(79, 70, 229, 0.2);
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: scale(0);
+    animation: wave 4s linear infinite;
+}
+
+.wave:nth-child(2) {
+    animation-delay: -1s;
+}
+
+.wave:nth-child(3) {
+    animation-delay: -2s;
+}
+
+.wave:nth-child(4) {
+    animation-delay: -3s;
+}
+
+.wave:nth-child(5) {
+    animation-delay: -4s;
+}
+
+@keyframes wave {
+    0% {
+        transform: scale(0);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1.5);
+        opacity: 0;
+    }
+}
+
     </style>
 </head>
 <body>
@@ -309,9 +395,9 @@
         <div>
             <h1>Grain Science & Industry Inventory Management</h1>
         </div>
-        <div class="last-sync">
-            <i class="fas fa-sync"></i>
-            Last synced: Just now
+        <div class="connection-status" id="connectionStatus">
+            <i class="fas fa-circle"></i>
+            <span>Connecting...</span>
         </div>
     </div>
 
@@ -332,7 +418,7 @@
             </div>
             <div class="stock-info">
                 <h3>24</h3>
-                <p>Items In Stock</p>
+                <p>Items In Inventory</p>
             </div>
         </div>
 
@@ -358,47 +444,20 @@
         <div class="card">
             <h2>Recent Activity</h2>
             <div class="activity-list" id="activityList">
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-user"></i>
+                <div id="emptyMessage" class="empty-message">
+                    <div class="wave-container">
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
+                        <div class="wave"></div>
                     </div>
-                    <div class="activity-details">
-                        <p><strong>John Doe</strong> from <span class="department">Research</span></p>
-                        <p class="activity-action">Requested 5 pens</p>
-                        <small class="activity-time">2 minutes ago</small>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="activity-details">
-                        <p><strong>Sarah Smith</strong> from <span class="department">Teaching</span></p>
-                        <p class="activity-action">Requested 10 papers</p>
-                        <small class="activity-time">5 minutes ago</small>
-                    </div>
-                </div>
-                <div class="activity-item">
-                    <div class="activity-icon">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="activity-details">
-                        <p><strong>Mike Johnson</strong> from <span class="department">Administration</span></p>
-                        <p class="activity-action">Requested 2 notebooks</p>
-                        <small class="activity-time">10 minutes ago</small>
-                    </div>
+                    <p>Waiting for new activity...</p>
                 </div>
             </div>
         </div>
+    
     </div>
-
-    <div class="card">
-        <h2>Department Usage Overview</h2>
-        <div class="chart-container">
-            <canvas id="deptChart"></canvas>
-        </div>
-    </div>
-
     <div class="card">
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
             <h2>Current Inventory</h2>
@@ -411,37 +470,32 @@
                 <tr>
                     <th>Item</th>
                     <th>Current Stock</th>
-                    <th>Department Usage</th>
                     <th>Status</th>
                     <th>Last Updated</th>
                 </tr>
             </thead>
             <tbody>
                 <tr>
-                    <td>Pens</td>
+                    <td>Pen</td>
                     <td>100</td>
-                    <td>Research (60%), Teaching (40%)</td>
                     <td><span class="status status-good">In Stock</span></td>
                     <td>5 mins ago</td>
                 </tr>
                 <tr>
                     <td>Paper</td>
                     <td>1000</td>
-                    <td>Teaching (75%), Admin (25%)</td>
                     <td><span class="status status-good">In Stock</span></td>
                     <td>10 mins ago</td>
                 </tr>
                 <tr>
-                    <td>Notebooks</td>
+                    <td>Notebook</td>
                     <td>15</td>
-                    <td>Research (80%), Teaching (20%)</td>
                     <td><span class="status status-low">Low Stock</span></td>
                     <td>15 mins ago</td>
                 </tr>
                 <tr>
                     <td>Lab Equipment</td>
                     <td>25</td>
-                    <td>Research (100%)</td>
                     <td><span class="status status-good">In Stock</span></td>
                     <td>20 mins ago</td>
                 </tr>
@@ -458,9 +512,9 @@
                 <div class="form-group">
                     <label for="item">Select Item</label>
                     <select id="item" required>
-                        <option value="pens">Pens</option>
+                        <option value="pen">Pen</option>
                         <option value="paper">Paper</option>
-                        <option value="notebooks">Notebooks</option>
+                        <option value="notebook">Notebook</option>
                         <option value="labequipment">Lab Equipment</option>
                     </select>
                 </div>
@@ -489,7 +543,7 @@
         new Chart(stockCtx, {
             type: 'bar',
             data: {
-                labels: ['Pens', 'Paper', 'Notebooks', 'Lab Equipment'],
+                labels: ['Pen', 'Paper', 'Notebook', 'Lab Equipment'],
                 datasets: [{
                     label: 'Current Stock',
                     data: [100, 1000, 75, 25],
@@ -520,56 +574,47 @@
                 }
             }
         });
-    
-        // Initialize Department Usage Chart
-        const deptCtx = document.getElementById('deptChart').getContext('2d');
-        new Chart(deptCtx, {
-            type: 'doughnut',
-            data: {
-                labels: ['Research', 'Teaching', 'Administration'],
-                datasets: [{
-                    data: [45, 30, 25],
-                    backgroundColor: [
-                        'rgba(79, 70, 229, 0.8)',
-                        'rgba(34, 197, 94, 0.8)',
-                        'rgba(234, 179, 8, 0.8)'
-                    ],
-                    borderWidth: 0
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'bottom'
-                    }
-                },
-                cutout: '70%'
-            }
-        });
-    
-        // Utility Functions
+
         function updateTotalItems() {
-            let total = 0;
-            const rows = document.querySelectorAll('.inventory-table tbody tr');
-            rows.forEach(row => {
-                total += parseInt(row.cells[1].textContent);
-            });
-            
-            const totalItemsElement = document.querySelector('.stock-card:first-child .stock-info h3');
-            if (totalItemsElement) {
-                totalItemsElement.textContent = total.toLocaleString();
-            }
-        }
+    let total = 0;
+    const rows = document.querySelectorAll('.inventory-table tbody tr');
+    rows.forEach(row => {
+        total += parseInt(row.cells[1].textContent);
+    });
     
-        function updateDashboard() {
-            const now = new Date().toLocaleTimeString();
-            document.querySelector('.last-sync').innerHTML = `
-                <i class="fas fa-sync"></i>
-                Last synced: ${now}
-            `;
+    const totalItemsElement = document.querySelector('.stock-card:first-child .stock-info h3');
+    if (totalItemsElement) {
+        totalItemsElement.textContent = total;
+    }
+}
+
+        // Utility Functions
+        function updateItemsInStock() {
+    const rows = document.querySelectorAll('.inventory-table tbody tr');
+    const totalItemsInStock = rows.length;
+    
+    const itemsInStockElement = document.querySelector('.stock-card:nth-child(2) .stock-info h3');
+    if (itemsInStockElement) {
+        itemsInStockElement.textContent = totalItemsInStock;
+    }
+}
+
+function updateLowStockItems() {
+    const rows = document.querySelectorAll('.inventory-table tbody tr');
+    let lowStockCount = 0;
+    
+    rows.forEach(row => {
+        const status = row.querySelector('.status').textContent.trim();
+        if (status === 'Low Stock') {
+            lowStockCount++;
         }
+    });
+    
+    const lowStockItemsElement = document.querySelector('.stock-card:nth-child(3) .stock-info h3');
+    if (lowStockItemsElement) {
+        lowStockItemsElement.textContent = lowStockCount;
+    }
+}
     
         // Modal Functions
         function showUpdateModal() {
@@ -580,103 +625,220 @@
             document.getElementById('updateModal').classList.remove('active');
         }
     
-        // Activity Functions
         function addNewActivity(userData) {
-            const activityList = document.getElementById('activityList');
-            const activityItem = document.createElement('div');
-            activityItem.className = 'activity-item';
-            
-            // Create different messages for updates vs requests
-            let actionText = userData.action === 'updated' 
-                ? `Updated ${userData.item} inventory level to ${userData.quantity} units`
-                : `Requested ${userData.quantity} ${userData.item}`;
+            const emptyMessage = document.getElementById('emptyMessage');
+    if (emptyMessage) {
+        emptyMessage.remove();
+    }
     
-            activityItem.innerHTML = `
-                <div class="activity-icon">
-                    <i class="fas fa-${userData.action === 'updated' ? 'edit' : 'user'}"></i>
-                </div>
-                <div class="activity-details">
-                    <p><strong>${userData.name}</strong> <span class="department">(${userData.department})</span></p>
-                    <p class="activity-action">${actionText}</p>
-                    <small class="activity-time">Just now</small>
-                </div>
-            `;
-            
-            activityList.insertBefore(activityItem, activityList.firstChild);
-            
-            if (activityList.children.length > 10) {
-                activityList.removeChild(activityList.lastChild);
-            }
+    const activityList = document.getElementById('activityList');
+    const activityItem = document.createElement('div');
+    activityItem.className = 'activity-item';
+    
+    // Get current timestamp
+    const timestamp = new Date().getTime();
+    
+    // Create different messages for updates vs requests
+    let actionText = userData.action === 'updated' 
+        ? `Updated ${userData.item} inventory level to ${userData.quantity} units`
+        : `Requested ${userData.quantity} ${userData.item}`;
+
+    activityItem.innerHTML = `
+        <div class="activity-icon">
+            <i class="fas fa-${userData.action === 'updated' ? 'edit' : 'user'}"></i>
+        </div>
+        <div class="activity-details">
+            <p><strong>${userData.name}</strong> <span class="department">(${userData.department})</span></p>
+            <p class="activity-action">${actionText}</p>
+            <small class="activity-time" data-timestamp="${timestamp}">Just now</small>
+        </div>
+    `;
+    
+    activityList.insertBefore(activityItem, activityList.firstChild);
+    
+    if (activityList.children.length > 10) {
+        activityList.removeChild(activityList.lastChild);
+    }
+
+    // Update timestamps
+    updateActivityTimes();
+}
+    
+function handleUpdate(event) {
+    event.preventDefault();
+    const item = document.getElementById('item').value;
+    const quantity = parseInt(document.getElementById('quantity').value);
+    const reason = document.getElementById('reason').value;
+
+    // Send update to server via WebSocket
+    if (ws && ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({
+            type: 'stock_update',
+            item: item,
+            quantity: quantity,
+            reason: reason,
+            timestamp: new Date().toISOString()
+        }));
+    }
+
+    // Update the table quantities
+    const rows = document.querySelectorAll('.inventory-table tbody tr');
+    rows.forEach(row => {
+    const itemName = row.cells[0].textContent.toLowerCase().replace(/\s+/g, '');
+    const updatedItem = item.toLowerCase().replace(/\s+/g, '');
+    if (itemName === updatedItem) {
+        row.cells[1].textContent = quantity;
+        
+        const statusCell = row.cells[2].querySelector('.status');
+        if (quantity < 30) {
+            statusCell.className = 'status status-low';
+            statusCell.textContent = 'Low Stock';
+        } else {
+            statusCell.className = 'status status-good';
+            statusCell.textContent = 'In Stock';
         }
-    
-        // Update Functions
-        function handleUpdate(event) {
-            event.preventDefault();
-            const item = document.getElementById('item').value;
-            const quantity = parseInt(document.getElementById('quantity').value);
-            const reason = document.getElementById('reason').value;
-    
-            // Update the table quantities
-            const rows = document.querySelectorAll('.inventory-table tbody tr');
-            rows.forEach(row => {
-                const itemName = row.cells[0].textContent.toLowerCase();
-                if (itemName === item) {
-                    row.cells[1].textContent = quantity;
-                    
-                    const statusCell = row.cells[3].querySelector('.status');
-                    if (quantity < 30) {
-                        statusCell.className = 'status status-low';
-                        statusCell.textContent = 'Low Stock';
-                    } else {
-                        statusCell.className = 'status status-good';
-                        statusCell.textContent = 'In Stock';
-                    }
-                    
-                    row.cells[4].textContent = 'Just now';
-                }
-            });
-    
-            // Update the stock chart
-            const stockChart = Chart.getChart('stockChart');
-            if (stockChart) {
-                const dataIndex = stockChart.data.labels.findIndex(
-                    label => label.toLowerCase() === item
-                );
-                if (dataIndex !== -1) {
-                    stockChart.data.datasets[0].data[dataIndex] = quantity;
-                    stockChart.update();
-                }
-            }
-    
-            addNewActivity({
-                name: 'Stock Manager',
-                department: 'Inventory',
-                quantity: quantity,
-                item: item,
-                action: 'updated'
-            });
-    
-            updateTotalItems();
-            alert('Inventory updated successfully!');
-            hideUpdateModal();
+        
+        row.cells[3].textContent = 'Just now';
+    }
+});
+
+    // Update the stock chart
+    const stockChart = Chart.getChart('stockChart');
+    if (stockChart) {
+        const dataIndex = stockChart.data.labels.findIndex(
+    label => label.toLowerCase().replace(/\s+/g, '') === item.toLowerCase().replace(/\s+/g, '')
+);
+        if (dataIndex !== -1) {
+            stockChart.data.datasets[0].data[dataIndex] = quantity;
+            stockChart.update();
         }
+    }
+
+    addNewActivity({
+        name: 'Stock Manager',
+        department: 'Inventory',
+        quantity: quantity,
+        item: item,
+        action: 'updated'
+    });
+
+    updateItemsInStock();
+    updateLowStockItems();
+    updateTotalItems();
+    alert('Inventory updated successfully!');
+    hideUpdateModal();
+}
+
+function handleKioskData(data) {
+    // Create a unique identifier for this request
+    const requestId = `${data.name}-${data.item}-${data.quantity}-${data.timestamp}`;
     
-        // Kiosk Integration Functions
-        function handleKioskData(data) {
-            addNewActivity(data);
+    // Check if we've already processed this exact request
+    if (processedRequests.has(requestId)) {
+        console.log('Duplicate request detected and skipped:', requestId);
+        return;
+    }
+    
+    // Add this request to our processed set
+    processedRequests.add(requestId);
+    
+    // Clear old requests after 5 seconds to prevent memory buildup
+    setTimeout(() => {
+        processedRequests.delete(requestId);
+    }, 5000);
+    
+    // Add to activity list
+    addNewActivity({
+        name: data.name,
+        department: data.department,
+        quantity: data.quantity,
+        item: data.item,
+        action: 'requested'
+    });
+    
+    // Update table stock numbers
+    const rows = document.querySelectorAll('.inventory-table tbody tr');
+    rows.forEach(row => {
+        const itemName = row.cells[0].textContent.toLowerCase().replace(/\s+/g, '');
+        const requestItem = data.item.toLowerCase().replace(/\s+/g, '');
+        
+        if (itemName === requestItem) {
+            // Get current stock and reduce it
+            const currentStock = parseInt(row.cells[1].textContent);
+            const newStock = currentStock - data.quantity;
             
-            const stockElement = document.querySelector(`#${data.item}-stock`);
-            if (stockElement) {
-                const currentStock = parseInt(stockElement.textContent);
-                stockElement.textContent = currentStock - data.quantity;
+            // Update stock number
+            row.cells[1].textContent = newStock;
+            
+            // Update status
+            const statusCell = row.cells[2].querySelector('.status');
+            if (newStock < 30) {
+                statusCell.className = 'status status-low';
+                statusCell.textContent = 'Low Stock';
+            } else {
+                statusCell.className = 'status status-good';
+                statusCell.textContent = 'In Stock';
             }
-            updateTotalItems();
+            
+            // Update timestamp
+            row.cells[3].textContent = 'Just now';
         }
-    
+    });
+
+    // Update statistics
+    updateTotalItems();
+    updateItemsInStock();
+    updateLowStockItems();
+
+    // Update the stock chart
+    const stockChart = Chart.getChart('stockChart');
+    if (stockChart) {
+        const dataIndex = stockChart.data.labels.findIndex(
+            label => label.toLowerCase().replace(/\s+/g, '') === data.item.toLowerCase().replace(/\s+/g, '')
+        );
+        if (dataIndex !== -1) {
+            stockChart.data.datasets[0].data[dataIndex] -= data.quantity;
+            stockChart.update();
+        }
+    }
+}
+
+function updateActivityTimes() {
+    const timeElements = document.querySelectorAll('.activity-time');
+    timeElements.forEach(element => {
+        const timestamp = parseInt(element.dataset.timestamp);
+        const now = new Date().getTime();
+        const diff = now - timestamp;
+        
+        // Convert to appropriate time format
+        let timeText;
+        if (diff < 60000) { // Less than 1 minute
+            timeText = 'Just now';
+        } else if (diff < 3600000) { // Less than 1 hour
+            const minutes = Math.floor(diff / 60000);
+            timeText = `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+        } else if (diff < 86400000) { // Less than 1 day
+            const hours = Math.floor(diff / 3600000);
+            timeText = `${hours} hour${hours > 1 ? 's' : ''} ago`;
+        } else {
+            const days = Math.floor(diff / 86400000);
+            timeText = `${days} day${days > 1 ? 's' : ''} ago`;
+        }
+        
+        element.textContent = timeText;
+    });
+}
+
+// Add this line after the function
+setInterval(updateActivityTimes, 60000);
+
         // Event Listeners
         document.addEventListener('DOMContentLoaded', function() {
-            updateTotalItems();
-        });
+    updateTotalItems();
+    updateItemsInStock();
+    updateLowStockItems();
+    connectDashboardWebSocket();
+});
     
         window.onclick = function(event) {
             const modal = document.getElementById('updateModal');
@@ -689,19 +851,30 @@
             if (e.key === 'Escape') {
                 hideUpdateModal();
             }
-        });
-    
-        // Initialize
-        updateDashboard();
-        setInterval(updateDashboard, 30000);
+        });   
 // Add this to your management dashboard's script section
 let ws;
-const SERVER_URL = 'ws://localhost:8080'; // Change to your server URL when deployed
+const SERVER_URL = 'ws://10.132.170.135:8080';
+
+const processedRequests = new Set();
+
+function updateConnectionStatus(status) {
+    const statusElement = document.getElementById('connectionStatus');
+    if (statusElement) {
+        statusElement.className = `connection-status ${status.toLowerCase()}`;
+        statusElement.innerHTML = `
+            <i class="fas fa-circle"></i>
+            <span>Status: ${status} (${new Date().toLocaleTimeString()})</span>
+        `;
+    }
+}
 
 function connectDashboardWebSocket() {
     ws = new WebSocket(SERVER_URL);
+    updateConnectionStatus('Connecting');
     
     ws.onopen = () => {
+        console.log('Connected to inventory server');
         updateConnectionStatus('Connected');
     };
 
@@ -714,6 +887,7 @@ function connectDashboardWebSocket() {
             }
         } catch (error) {
             console.error('Error processing message:', error);
+            updateConnectionStatus('Error');
         }
     };
 
@@ -722,20 +896,32 @@ function connectDashboardWebSocket() {
         // Try to reconnect after 5 seconds
         setTimeout(connectDashboardWebSocket, 5000);
     };
+
+    ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        updateConnectionStatus('Error');
+    };
 }
 
-function updateConnectionStatus(status) {
-    const statusElement = document.querySelector('.last-sync');
-    if (statusElement) {
-        statusElement.innerHTML = `
-            <i class="fas fa-${status === 'Connected' ? 'check-circle' : 'exclamation-circle'}"></i>
-            Status: ${status} (${new Date().toLocaleTimeString()})
-        `;
+// Event Listeners
+document.addEventListener('DOMContentLoaded', function() {
+    updateItemsInStock();
+    updateLowStockItems();
+    connectDashboardWebSocket();
+});
+
+window.onclick = function(event) {
+    const modal = document.getElementById('updateModal');
+    if (event.target === modal) {
+        hideUpdateModal();
     }
-}
+};
 
-// Initialize connection
-document.addEventListener('DOMContentLoaded', connectDashboardWebSocket);    
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        hideUpdateModal();
+    }
+});
     </script>
 </body>
 </html>

@@ -538,7 +538,6 @@
         </div>
     </div>
     <script>
-        // Initialize Stock Chart
         const stockCtx = document.getElementById('stockChart').getContext('2d');
         new Chart(stockCtx, {
             type: 'bar',
@@ -587,8 +586,6 @@
         totalItemsElement.textContent = total;
     }
 }
-
-        // Utility Functions
         function updateItemsInStock() {
     const rows = document.querySelectorAll('.inventory-table tbody tr');
     const totalItemsInStock = rows.length;
@@ -615,8 +612,7 @@ function updateLowStockItems() {
         lowStockItemsElement.textContent = lowStockCount;
     }
 }
-    
-        // Modal Functions
+
         function showUpdateModal() {
             document.getElementById('updateModal').classList.add('active');
         }
@@ -635,10 +631,9 @@ function updateLowStockItems() {
     const activityItem = document.createElement('div');
     activityItem.className = 'activity-item';
     
-    // Get current timestamp
+
     const timestamp = new Date().getTime();
     
-    // Create different messages for updates vs requests
     let actionText = userData.action === 'updated' 
         ? `Updated ${userData.item} inventory level to ${userData.quantity} units`
         : `Requested ${userData.quantity} ${userData.item}`;
@@ -670,7 +665,6 @@ function handleUpdate(event) {
     const quantity = parseInt(document.getElementById('quantity').value);
     const reason = document.getElementById('reason').value;
 
-    // Send update to server via WebSocket
     if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(JSON.stringify({
             type: 'stock_update',
@@ -681,7 +675,6 @@ function handleUpdate(event) {
         }));
     }
 
-    // Update the table quantities
     const rows = document.querySelectorAll('.inventory-table tbody tr');
     rows.forEach(row => {
     const itemName = row.cells[0].textContent.toLowerCase().replace(/\s+/g, '');
@@ -702,7 +695,6 @@ function handleUpdate(event) {
     }
 });
 
-    // Update the stock chart
     const stockChart = Chart.getChart('stockChart');
     if (stockChart) {
         const dataIndex = stockChart.data.labels.findIndex(
@@ -730,24 +722,19 @@ function handleUpdate(event) {
 }
 
 function handleKioskData(data) {
-    // Create a unique identifier for this request
     const requestId = `${data.name}-${data.item}-${data.quantity}-${data.timestamp}`;
     
-    // Check if we've already processed this exact request
     if (processedRequests.has(requestId)) {
         console.log('Duplicate request detected and skipped:', requestId);
         return;
     }
     
-    // Add this request to our processed set
     processedRequests.add(requestId);
     
-    // Clear old requests after 5 seconds to prevent memory buildup
     setTimeout(() => {
         processedRequests.delete(requestId);
     }, 5000);
     
-    // Add to activity list
     addNewActivity({
         name: data.name,
         department: data.department,
@@ -755,8 +742,7 @@ function handleKioskData(data) {
         item: data.item,
         action: 'requested'
     });
-    
-    // Update table stock numbers
+
     const rows = document.querySelectorAll('.inventory-table tbody tr');
     rows.forEach(row => {
         const itemName = row.cells[0].textContent.toLowerCase().replace(/\s+/g, '');
@@ -767,10 +753,9 @@ function handleKioskData(data) {
             const currentStock = parseInt(row.cells[1].textContent);
             const newStock = currentStock - data.quantity;
             
-            // Update stock number
+        
             row.cells[1].textContent = newStock;
             
-            // Update status
             const statusCell = row.cells[2].querySelector('.status');
             if (newStock < 30) {
                 statusCell.className = 'status status-low';
@@ -779,18 +764,15 @@ function handleKioskData(data) {
                 statusCell.className = 'status status-good';
                 statusCell.textContent = 'In Stock';
             }
-            
-            // Update timestamp
+        
             row.cells[3].textContent = 'Just now';
         }
     });
 
-    // Update statistics
     updateTotalItems();
     updateItemsInStock();
     updateLowStockItems();
 
-    // Update the stock chart
     const stockChart = Chart.getChart('stockChart');
     if (stockChart) {
         const dataIndex = stockChart.data.labels.findIndex(
@@ -810,7 +792,6 @@ function updateActivityTimes() {
         const now = new Date().getTime();
         const diff = now - timestamp;
         
-        // Convert to appropriate time format
         let timeText;
         if (diff < 60000) { // Less than 1 minute
             timeText = 'Just now';
@@ -828,11 +809,7 @@ function updateActivityTimes() {
         element.textContent = timeText;
     });
 }
-
-// Add this line after the function
-setInterval(updateActivityTimes, 60000);
-
-        // Event Listeners
+setInterval(updateActivityTimes, 60000
         document.addEventListener('DOMContentLoaded', function() {
     updateTotalItems();
     updateItemsInStock();
@@ -852,7 +829,6 @@ setInterval(updateActivityTimes, 60000);
                 hideUpdateModal();
             }
         });   
-// Add this to your management dashboard's script section
 let ws;
 const SERVER_URL = 'ws://10.132.170.135:8080';
 
@@ -893,7 +869,7 @@ function connectDashboardWebSocket() {
 
     ws.onclose = () => {
         updateConnectionStatus('Disconnected');
-        // Try to reconnect after 5 seconds
+
         setTimeout(connectDashboardWebSocket, 5000);
     };
 
@@ -903,7 +879,6 @@ function connectDashboardWebSocket() {
     };
 }
 
-// Event Listeners
 document.addEventListener('DOMContentLoaded', function() {
     updateItemsInStock();
     updateLowStockItems();
